@@ -1,7 +1,5 @@
 ﻿using Kenso.Domain;
 using Npgsql;
-using NpgsqlTypes;
-using System.Reflection;
 
 namespace Kenso.Data.Repository.Postgres
 {
@@ -13,12 +11,12 @@ namespace Kenso.Data.Repository.Postgres
         {
             _connectionString = connectionString;
         }
-        public async Task<long> Upsert(Part part, long modelId, string source)
+        public async Task<long> Upsert(Part part, long? modelId, string source)
         {
-            const string sql = "WITH new_part AS (INSERT INTO part (number, name, description, model_id, create_timestamp, update_timestamp, updated_by) " +
-                               "VALUES (@partNumber, @partName, @description, @modelId, NOW(), NOW(), @source) " +
+            const string sql = "WITH new_part AS (INSERT INTO part (number, name, description, create_timestamp, update_timestamp, updated_by) " +
+                               "VALUES (@partNumber, @partName, @description, NOW(), NOW(), @source) " +
                                "ON CONFLICT (number) DO UPDATE " +
-                               "SET name = @partName, model_id = @modelId, description = @description, update_timestamp = 'NOW()', updated_by = @source  RETURNING id)" +
+                               "SET name = @partName, description = @description, update_timestamp = 'NOW()', updated_by = @source  RETURNING id)" +
                                "SELECT id FROM new_part";
 
             await using var dataSource = NpgsqlDataSource.Create(_connectionString);
@@ -26,7 +24,7 @@ namespace Kenso.Data.Repository.Postgres
             cmd.Parameters.AddWithValue("@partNumber", part.Number);
             cmd.Parameters.AddWithValue("@partName",  string.IsNullOrEmpty(part.Name) ? DBNull.Value : part.Name);
             cmd.Parameters.AddWithValue("@description", string.IsNullOrEmpty(part.Description) ? DBNull.Value : part.Description);
-            cmd.Parameters.AddWithValue("@modelId", modelId);
+            cmd.Parameters.AddWithValue("@modelId", modelId == null ? DBNull.Value : modelId);
             cmd.Parameters.AddWithValue("@source", source);
 
             await using var reader = await cmd.ExecuteReaderAsync();
@@ -35,19 +33,18 @@ namespace Kenso.Data.Repository.Postgres
             return partId;
         }
 
-        //public long Insert(Part part, string source)
-        //{
-        //    var sql = "WITH new_parts AS (\r\n" +
-        //              "    INSERT INTO part (number, name, create_timestamp, update_timestamp, updated_by)\r\n" +
-        //              $"    VALUES('{part.Number}','{part.Name}', 'NOW()','NOW()', '{source}') \r\n" +
-        //              "    ON CONFLICT(number) DO NOTHING\r\n" +
-        //              "    RETURNING id\r\n" +
-        //              ") SELECT COALESCE(\r\n" +
-        //              "    (SELECT id FROM new_parts),\r\n" +
-        //              $"    (SELECT id FROM part WHERE number = '{part.Number}')\r\n" +
-        //              ") AS partid;";
+        public async Task AddModelPartMapping(long partId, long modelId)
+        {
+            const string sql = "INSERT INTO model_part (model_id, part_id) " +
+                               "VALUES (@modelId, @partId) " +
+                               "ON CONFLICT (model_id, part_id) DO NOTHING;";
 
+            await using var dataSource = NpgsqlDataSource.Create(_connectionString);
+            await using var cmd = dataSource.CreateCommand(sql);
+            cmd.Parameters.AddWithValue("@modelId", modelId);
+            cmd.Parameters.AddWithValue("@partId", partId);
 
-        //}
+            await cmd.ExecuteNonQueryAsync();
+        }
     }
 }

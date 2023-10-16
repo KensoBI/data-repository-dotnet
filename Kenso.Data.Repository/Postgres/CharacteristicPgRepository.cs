@@ -41,7 +41,7 @@ namespace Kenso.Data.Repository.Postgres
             cmd.Parameters.AddWithValue("@featureId", featureId);
             cmd.Parameters.AddWithValue("@name", string.IsNullOrEmpty(characteristic.Name) ? DBNull.Value : characteristic.Name);
             cmd.Parameters.AddWithValue("@description", string.IsNullOrEmpty(characteristic.Description) ? DBNull.Value : characteristic.Description);
-            cmd.Parameters.AddWithValue("@nominal", characteristic.Nominal);
+            cmd.Parameters.AddWithValue("@nominal", characteristic.Nominal.HasValue ? characteristic.Nominal.Value : DBNull.Value);
             cmd.Parameters.AddWithValue("@usl", characteristic.Usl.HasValue ? characteristic.Usl : DBNull.Value);
             cmd.Parameters.AddWithValue("@lsl", characteristic.Lsl.HasValue ? characteristic.Lsl : DBNull.Value);
             cmd.Parameters.AddWithValue("@uslWarn", characteristic.UslWarn.HasValue ? characteristic.UslWarn : DBNull.Value);
