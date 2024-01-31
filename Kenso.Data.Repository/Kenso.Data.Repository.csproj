@@ -9,7 +9,7 @@
     <Authors>kenso</Authors>
     <Company>Kenso Software</Company>
     <Description>Repository classes for .NET Kenso Software projects designed to interact with a PostgreSQL database.</Description>
-    <Copyright>Copyright 2023 Kenso Software</Copyright>
+    <Copyright>Copyright 2024 Kenso Software</Copyright>
     <PackageProjectUrl>https://kensobi.com/</PackageProjectUrl>
     <PackageIcon>kensobi-logo.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
@@ -18,7 +18,7 @@
     <PackageTags>kensobi;kenso;repository;postgres</PackageTags>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-    <Version>1.0.2</Version>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,7 +33,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Kenso.Domain" Version="1.0.2" />
+    <PackageReference Include="Kenso.Domain" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="7.0.1" />
     <PackageReference Include="Npgsql" Version="7.0.6" />
   </ItemGroup>
 

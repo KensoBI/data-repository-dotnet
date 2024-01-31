@@ -7,5 +7,6 @@
         public IFeatureRepository FeatureRepository { get; }
         public ICharacteristicRepository CharacteristicRepository { get; }
         public IMeasurementRepository MeasurementRepository { get; }
+        public IAssetRepository AssetRepository { get; }
     }
 }

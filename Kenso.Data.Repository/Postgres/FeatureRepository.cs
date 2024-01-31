@@ -1,15 +1,23 @@
 ﻿using Kenso.Domain;
+using Microsoft.Extensions.Options;
 using Npgsql;
 
 namespace Kenso.Data.Repository.Postgres
 {
-    public class FeaturePgRepository : IFeatureRepository
+    public class FeatureRepository : IFeatureRepository
     {
         private readonly string _connectionString;
 
-        public FeaturePgRepository(string connectionString)
+        public FeatureRepository(IOptions<DatabaseOptions> databaseOptions)
         {
-            _connectionString = connectionString;
+            if (databaseOptions == null) throw new ArgumentNullException(nameof(databaseOptions));
+
+            if (string.IsNullOrEmpty(databaseOptions.Value.ConnectionString))
+            {
+                throw new ArgumentException("Connection string not provided.");
+            }
+
+            _connectionString = databaseOptions.Value.ConnectionString;
         }
 
         public async Task<long> Upsert(Feature feature, long partId, string source)
@@ -24,7 +32,7 @@ namespace Kenso.Data.Repository.Postgres
                                    "reference = @reference," +
                                    "comment = @comment, " +
                                    "external_id = @externalId, " +
-                                   "update_timestamp = 'NOW()', " +
+                                   "update_timestamp = NOW(), " +
                                    "updated_by = @source " +
                                    "RETURNING id)" +
                                "SELECT COALESCE(\r\n" +

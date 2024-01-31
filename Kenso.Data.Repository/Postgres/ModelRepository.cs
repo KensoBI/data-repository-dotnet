@@ -1,14 +1,22 @@
-﻿using Npgsql;
+﻿using Microsoft.Extensions.Options;
+using Npgsql;
 
 namespace Kenso.Data.Repository.Postgres
 {
-    public class ModelPgRepository : IModelRepository
+    public class ModelRepository : IModelRepository
     {
         private readonly string _connectionString;
 
-        public ModelPgRepository(string connectionString)
+        public ModelRepository(IOptions<DatabaseOptions> databaseOptions)
         {
-            _connectionString = connectionString;
+            if (databaseOptions == null) throw new ArgumentNullException(nameof(databaseOptions));
+
+            if (string.IsNullOrEmpty(databaseOptions.Value.ConnectionString))
+            {
+                throw new ArgumentException("Connection string not provided.");
+            }
+
+            _connectionString = databaseOptions.Value.ConnectionString;
         }
 
         public async Task<long> Insert(Domain.Model model, string source)
